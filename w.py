@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Jun  5 23:24:32 2018
-
-@author: dsvar
+    n-queen problem using genetic algorithm
 """
 
 import numpy as np
@@ -141,7 +139,7 @@ def board(c):
     return board
     
     
-def main(): 
+def _main(): 
     
     n = 4
     gmax = 100000
@@ -163,44 +161,101 @@ def main():
         print(board(indv.chrom))
     print('------------------------------------')
     
-    ps = selection(p,len(p)//2,'rws')
+    p = selection(p,len(p)//2,'rws')
     
     print('poblacion seleccionada')
     print()
-    for indv in ps:
+    for indv in p:
         print('cromosoma ==> ', indv.chrom)
         print('fitness ==> ,', indv.fitness)
         print(board(indv.chrom))
     print('------------------------------------')
     
-    pc = crossover(ps)
+    p = crossover(p)
     
     print('poblacion cruzada')
     print()
-    for indv in pc:
+    for indv in p:
         print('cromosoma ==> ', indv.chrom)
         print('fitness ==> ,', indv.fitness)
         print(board(indv.chrom))
     print('------------------------------------')
     
-    pm = mutation(pc)
+    p = mutation(p)
         
     print('poblacion mutada')
     print()
-    for indv in pm:
+    for indv in p:
         print('cromosoma ==> ', indv.chrom)
         print('fitness ==> ,', indv.fitness)
         print(board(indv.chrom))
     print('------------------------------------')
     
-    for indv in pm:
+    for indv in p:
         if indv.fitness == 1.0:
             print('solution found!')
             print(indv.chrom)
+            
+def solve(n,gmax,pc,pm,size):
     
+    solution = []
+    g = 0
+    ncross = 0
+    nmuts = 0
+    p = []
     
+    p = genPopulation(n, size)
+    p = computeFitness(p)
     
+    while g < gmax:
+        
+        g += 1
+        
+        p = selection(p,len(p)//2,'rws')
+        
+        if np.random.rand() <= pc:
+            p = crossover(p)
+            ncross += 1
+            
+        if np.random.rand() <= pm:
+            p = mutation(p)
+            nmuts += 1
+        
+        for indv in p:
+            if indv.fitness == 1.0:
+                solution.append(indv)
+                break
+            break
+    
+    return solution
+    
+def main():
+    n = 1000            # number of initial population
+    gmax = 100000       # maximum number of generations
+    pc = 0.7            # crossover probability
+    pm = 0.3            # mutation probability
+    
+    solution = solve(n,gmax,pc,pm,8)
+    
+    if len(solution) == 0:
+        print('No solution was found')
+    else:
+        print('The solution was found!\n')
+        print('Chromosome: ', solution[0].chrom)
+        print('Fitness: ', solution[0].fitness)
+        print('Board: \n')
+        print(board(solution[0].chrom))
+    
+'''
 
+    solutions for the 6-queen problem:
+        
+        1.- [1,3,5,0,2,4]
+        2.- [4,2,0,5,3,1]
+        3.- [2,5,1,4,0,3]
+        4.- [3,0,4,1,5,2]
+        
+'''
 
 if __name__ == "__main__":
     main()
