@@ -5,6 +5,7 @@
 
 import numpy as np
 import math
+import time
 
 class chromosome(object):
     
@@ -137,65 +138,78 @@ def board(c):
     for i in range(len(c)):
         board[c[i]][i] = 1
     return board
+
+def writeFile(f,p,header):
+    f.write(header)
+    for indv in p:
+        f.write('\nChromosome => ' + str(indv.chrom))
+        f.write('\nFitness => ' + str(indv.fitness))
+        f.write('\nBoard => \n') 
+        f.write(str(board(indv.chrom)))
+        f.write('\n\n')
+    f.write('\n\n')
             
 def solve(n,gmax,pc,pm,size):
     
-    solution = []
-    g = 0
-    ncross = 0
-    nmuts = 0
-    p = []
+    solution = []                   # solution list
+    g = 0                           # generation's number
+    p = []                          # population list
+    f = open('solution.txt','w')    # file to write the populations
+    ng = n//2                       # half of population's size
+    start_time = time.time()        # Start time of the program
     
-    p = genPopulation(n, size)
-    p = computeFitness(p)
+    p = genPopulation(n, size)      # generate the population
+    p = computeFitness(p)           # compute their fitness
     
-    while g < gmax:
+    writeFile(f,p,'Initial population:\n')
+    
+    while True:
         
+        if g == gmax:
+            break
+        
+        if len(solution) > 0:
+            break
+    
         g += 1
         
-        p = selection(p,len(p)//2,'rws')
+        p = selection(p,ng,'rws')
+        writeFile(f,p,'Generation ' + str(g) + '\n' + 'Selected population\n')
         
         if np.random.rand() <= pc:
             p = crossover(p)
-            ncross += 1
+            writeFile(f,p,'Generation ' + str(g) + '\n' + 'Crossed population\n')
             
         if np.random.rand() <= pm:
             p = mutation(p)
-            nmuts += 1
+            writeFile(f,p,'Generation ' + str(g) + '\n' + 'Mutated population\n')
         
         for indv in p:
             if indv.fitness == 1.0:
+                end_time = time.time()             # end time of the solution
                 solution.append(indv)
+                print('\nThe solution was found!')
+                print('...at generation => ', g)
+                print('...in ' + str(end_time-start_time) + ' seconds')
                 break
             break
+    
+    f.close()
     
     return solution
     
 def main():
-    n = 1000            # number of initial population
+    n = 10            # number of initial population
     gmax = 100000       # maximum number of generations
     pc = 0.7            # crossover probability
     pm = 0.3            # mutation probability
-    size = 15            # board size
+    size = 6            # board size
     
     solution = solve(n,gmax,pc,pm,size)
-    
-    '''
-    
-    if len(solution) == 0:
-        print('No solution was found')
-    else:
-        print('The solution was found!\n')
-        print('Chromosome: ', solution[0].chrom)
-        print('Fitness: ', solution[0].fitness)
-        print('Board: \n')
-        print(board(solution[0].chrom))
-    '''
         
     while len(solution) == 0:
         solution = solve(n,gmax,pc,pm,size)
-    print('\nThe solution was found!\n')
-    print('Chromosome: ', solution[0].chrom)
+    print('\nChromosome: ', solution[0].chrom)
     print('Fitness: ', solution[0].fitness)
     print('Board: \n')
     print(board(solution[0].chrom))    
@@ -240,5 +254,6 @@ if __name__ == "__main__":
     one solution for the 15-queen problem ():
         
         1.- [6,3,9,14,1,8,10,12,4,0,5,11,2,7,13]
+        2.- [9,11,1,5,10,0,7,14,12,2,6,8,3,13,4]
     
 '''
